@@ -1,6 +1,18 @@
 version: "3.8"
 
 services:
+  postgres:
+    image: postgres:15
+    container_name: app_db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   kafka:
     image: bitnami/kafka:3.7
     container_name: kafka
@@ -33,6 +45,32 @@ services:
     depends_on:
       - kafka
 
+  app:
+    build: .
+    container_name: app
+    ports:
+      - "${HTTP_PORT}:${HTTP_PORT}"
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=app_db
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_CONNECTION_RETRIES=${DB_CONNECTION_RETRIES}
+      - PG_DSN=postgresql://${DB_USER}:${DB_PASSWORD}@app_db:${DB_PORT}/${DB_NAME}
+      - KAFKA_TOPIC=${KAFKA_TOPIC}
+      - KAFKA_BROKERS=kafka:29092
+      - KAFKA_PARTITION=${KAFKA_PARTITION}
+      - KAFKA_OFFSET=${KAFKA_OFFSET}
+      - KAFKA_GROUP_ID=${KAFKA_GROUP_ID}
+      - CACHE_SIZE=${CACHE_SIZE}
+      - HTTP_PORT=${HTTP_PORT}
+      - LOG_LEVEL=${LOG_LEVEL}
+    depends_on:
+      - postgres
+      - kafka
+
 volumes:
+  postgres_data: {}
   kafka_data: {}
 

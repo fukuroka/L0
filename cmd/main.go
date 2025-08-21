@@ -74,7 +74,6 @@ func setup(ctx context.Context, cfg config.Config) (pool *pgxpool.Pool, orderSer
 	wr := kafka.NewWriter(cfg.Kafka)
 
 	c := cache.NewCache(cfg.CacheSize)
-	// create shared logger and pass to repo and service
 	logger := log.Default()
 	orderRepo := order.NewOrderRepository(p, logger)
 	s := order.NewOrderService(orderRepo, c, wr, logger)

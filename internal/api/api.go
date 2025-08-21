@@ -22,6 +22,8 @@ func (o *OrderHandler) RegisterOrderRouter() http.Handler {
 	router := gin.Default()
 
 	router.GET("/healthcheck", o.Health)
+	router.Static("/static", "./internal/web")
+	router.StaticFile("/", "./internal/web/index.html")
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	orderGroup := router.Group("/orders")
